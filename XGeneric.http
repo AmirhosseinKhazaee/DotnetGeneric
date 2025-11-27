@@ -1,0 +1,6 @@
+@XGeneric_HostAddress = http://localhost:5076
+
+GET {{XGeneric_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

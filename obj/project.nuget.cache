@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "NPBxKNd9kZk=",
+  "success": true,
+  "projectFilePath": "D:\\Project\\XGeneric\\XGeneric.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\amirhossein\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.11\\microsoft.aspnetcore.openapi.9.0.11.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\swashbuckle.aspnetcore\\6.7.0\\swashbuckle.aspnetcore.6.7.0.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.7.0\\swashbuckle.aspnetcore.swagger.6.7.0.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.7.0\\swashbuckle.aspnetcore.swaggergen.6.7.0.nupkg.sha512",
+    "C:\\Users\\amirhossein\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.7.0\\swashbuckle.aspnetcore.swaggerui.6.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}
