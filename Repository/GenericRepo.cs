@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using XGeneric.Models;
 
 namespace XGeneric.Repository
 {
@@ -31,7 +32,7 @@ namespace XGeneric.Repository
             if (entity.Id == Guid.Empty)
                 entity.Id = Guid.NewGuid();
 
-            entity.createdAt = DateTime.UtcNow;
+            entity.CreatedAt = DateTime.UtcNow;
 
             if (_repository.ContainsKey(entity.Id))
                 return false;

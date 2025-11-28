@@ -1,0 +1,23 @@
+using XGeneric.Attributes;
+
+namespace XGeneric.Models
+{
+    public abstract class BaseModel
+    {
+        public Guid Id { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// - XBaseModelAttribute:
+    /// - [] Force Check Properties has only One XKey Attribute;
+    /// - [] if Has XKey, attach CreateAt, UpdateAt, softDeleted, DeleteAt Properties ...
+    /// - XKeyAttribute:
+    /// - [] Retrieve Key Property Field Name;
+    /// - [] Retrieve Key Property Field Value;
+    /// - [] Has a Method to Determines Has Key or Not;
+    /// </summary>
+
+
+
+}

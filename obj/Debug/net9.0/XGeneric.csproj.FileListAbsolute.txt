@@ -33,3 +33,4 @@ D:\Project\XGeneric\obj\Debug\net9.0\refint\XGeneric.dll
 D:\Project\XGeneric\obj\Debug\net9.0\XGeneric.pdb
 D:\Project\XGeneric\obj\Debug\net9.0\XGeneric.genruntimeconfig.cache
 D:\Project\XGeneric\obj\Debug\net9.0\ref\XGeneric.dll
+D:\Project\XGeneric\obj\Debug\net9.0\XGeneric.sourcelink.json

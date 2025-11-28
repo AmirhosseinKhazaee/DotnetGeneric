@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using XGeneric.Base;
+using XGeneric.Extensions;
 using XGeneric.Models;
 using XGeneric.Repository;
 
@@ -15,12 +16,23 @@ namespace XGeneric.Api.Controllers
         {
             _personRepo = personRepo;
         }
+        [HttpGet("test")]
+        public string Test()
+        {
+            var result = Extension.GetKeyMetadata<Tasks>();
+            
+            return result.KeyFieldName;
+
+        }
 
         // GET: api/person
         [HttpGet]
         public IActionResult GetAll()
         {
             var result = _personRepo.GetAll();
+
+            //
+            var controllerName = ControllerContext.GetControllerName();
             return Ok(result);
         }
 
