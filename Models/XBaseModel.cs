@@ -13,9 +13,9 @@ namespace XGeneric.Models
     /// - [] Force Check Properties has only One XKey Attribute;
     /// - [] if Has XKey, attach CreateAt, UpdateAt, softDeleted, DeleteAt Properties ...
     /// - XKeyAttribute:
-    /// - [] Retrieve Key Property Field Name;
-    /// - [] Retrieve Key Property Field Value;
-    /// - [] Has a Method to Determines Has Key or Not;
+    /// - [X] Retrieve Key Property Field Name;
+    /// - [X] Retrieve Key Property Field Value;
+    /// - [X] Has a Method to Determines Has Key or Not;
     /// </summary>
 
 

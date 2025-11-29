@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using XGeneric.Attributes;
-using XGeneric.Models;
 
 namespace XGeneric.Extensions
 {
@@ -48,27 +42,6 @@ namespace XGeneric.Extensions
             return result;
         }
 
-
-
-        public static XKeyAttribute GetKeyMetadata<T>()
-        {
-            var prop = typeof(T)
-                .GetProperties()
-                .FirstOrDefault(p =>
-                    Attribute.IsDefined(p, typeof(XKeyAttribute)));
-
-            if (prop == null)
-                throw new Exception($"No property with [XKey] found on type {typeof(T).Name}");
-
-            var attr = (XKeyAttribute)prop.GetCustomAttribute(typeof(XKeyAttribute));
-
-            // Attach metadata
-            attr.KeyFieldName = prop.Name;     // ✔ works
-            attr.KeyFieldType = prop.PropertyType;  // ✔ works
-
-
-            return attr;
-        }
     }
 
 }

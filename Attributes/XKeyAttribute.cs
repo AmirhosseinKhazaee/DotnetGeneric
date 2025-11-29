@@ -9,6 +9,8 @@ namespace XGeneric.Attributes
     {
         public string? KeyFieldName { get; set; }
         public Type? KeyFieldType { get; set; }
+
+        public object KeyFieldValue {get; set;}
         public XKeyAttribute()
         {
         }

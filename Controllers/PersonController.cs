@@ -17,11 +17,20 @@ namespace XGeneric.Api.Controllers
             _personRepo = personRepo;
         }
         [HttpGet("test")]
-        public string Test()
+        public object Test()
         {
-            var result = Extension.GetKeyMetadata<Tasks>();
-            
-            return result.KeyFieldName;
+            var keyMetadata = AttributeExtension.GetKeyMetadata<Person>();
+            if (keyMetadata == null)
+            {
+                return BadRequest("No key defined for this model.");
+            }
+
+            // Otherwise, use keyMetadata
+
+            var result = keyMetadata.KeyFieldName;
+
+            return result;
+
 
         }
 
