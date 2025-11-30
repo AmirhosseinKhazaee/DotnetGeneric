@@ -4,13 +4,36 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using XGeneric.Attributes;
+using XGeneric.Models;
 
 namespace XGeneric.Extensions
 {
-    public class AttributeExtension
+    public static class AttributeExtension
     {
-        public static XKeyAttribute? GetKeyMetadata<T>()
-        {
+        public static bool HasKey<T>(this T source)
+        where T : BaseModel {
+            var result = false;
+            var keyMetadata = source.GetKeyMetadata();
+            var count = keyMetadata!.Count;
+            if (count > 0)
+            {
+                result = true;
+            }
+            return result;
+        }
+        public static bool HasOneKey<T>(this T source)
+        where T : BaseModel {
+            var result = false;
+            var keyMetadata = source.GetKeyMetadata();
+            if (keyMetadata!.Count == 1)
+            {
+                result = true;
+            }
+            return result;
+
+        }
+        public static XKeyAttribute? GetKeyMetadata<T>(this T source)
+        where T : BaseModel{
             var prop = typeof(T)
                 .GetProperties()
                 .FirstOrDefault(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
@@ -24,11 +47,14 @@ namespace XGeneric.Extensions
             var attr = prop.GetCustomAttribute<XKeyAttribute>();
             if (attr == null)
                 return null;
+            var count = typeof(T).GetProperties()
+            .Count(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
 
             // Attach metadata
             attr.KeyFieldName = prop.Name;
             attr.KeyFieldType = prop.PropertyType;
-
+            attr.Count = count;
+            attr.KeyFieldValue = prop.GetValue(source);
             return attr;
         }
     }

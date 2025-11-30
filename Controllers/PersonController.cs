@@ -19,7 +19,11 @@ namespace XGeneric.Api.Controllers
         [HttpGet("test")]
         public object Test()
         {
-            var keyMetadata = AttributeExtension.GetKeyMetadata<Person>();
+            //
+            var person = new Person(); // Comes From Every where ...
+
+            //
+            var keyMetadata = person.GetKeyMetadata();
             if (keyMetadata == null)
             {
                 return BadRequest("No key defined for this model.");
@@ -27,7 +31,8 @@ namespace XGeneric.Api.Controllers
 
             // Otherwise, use keyMetadata
 
-            var result = keyMetadata.KeyFieldName;
+            var result = keyMetadata.Count;
+            Console.WriteLine(keyMetadata.ToString());
 
             return result;
 
