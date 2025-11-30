@@ -23,7 +23,7 @@ namespace XGeneric.Api.Controllers
             var person = new Person(); // Comes From Every where ...
             if (person.IsXBaseModel())
             {
-               return $"{person.GetType().Name} is XBaseModel";
+                return $"{person.GetType().Name} is XBaseModel \n" + $"created at{person.CreatedAt} , updated at{person.UpdatedAt}";
             }
             //
 
@@ -74,7 +74,7 @@ namespace XGeneric.Api.Controllers
 
         // PUT: api/person/{id}
         [HttpPut("{id:guid}")]
-        public IActionResult Update(Guid id, Person model)
+        public object Update(Guid id, Person model)
         {
             if (model == null)
                 return BadRequest("Invalid data");
@@ -88,8 +88,12 @@ namespace XGeneric.Api.Controllers
             existing.Username = model.Username;
             existing.Firstname = model.Firstname;
             existing.Lastname = model.Lastname;
-
+            existing.UpdatedAt = DateTime.Now; 
             var success = _personRepo.Update(existing);
+            if (model.IsXBaseModel())
+            {
+                return $"{model.GetType().Name} is XBaseModel \n" + $"created at{model.CreatedAt} , updated at{model.UpdatedAt}";
+            }
 
             if (!success)
                 return StatusCode(500, "Cannot update person");

@@ -62,11 +62,23 @@ namespace XGeneric.Extensions
             return attr;
         }
         public static bool IsXBaseModel<T>(this T source)
-        where T : BaseModel
+            where T : BaseModel
         {
-            var result = Attribute.IsDefined(typeof(T), typeof(XBaseModelAttribute)) && source.HasOneKey();
-            return result;
+            var isBaseModel = Attribute.IsDefined(typeof(T), typeof(XBaseModelAttribute))
+                              && source.HasOneKey();
+
+            if (!isBaseModel)
+                return false;
+
+            // Auto-set base fields
+            source.CreatedAt = DateTime.UtcNow;
+            source.UpdatedAt = DateTime.UtcNow;
+            source.DeletedAt = null;
+            source.SoftDeleted = false;
+
+            return true;
         }
+
 
     }
 }

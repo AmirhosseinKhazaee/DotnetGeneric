@@ -5,8 +5,14 @@ namespace XGeneric.Models
     public abstract class BaseModel
     {
         public Guid Id { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public bool SoftDeleted { get; set; }
     }
+
+}
 
     /// <summary>
     /// - XBaseModelAttribute:
@@ -20,4 +26,3 @@ namespace XGeneric.Models
 
 
 
-}

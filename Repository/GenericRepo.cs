@@ -32,7 +32,7 @@ namespace XGeneric.Repository
             if (entity.Id == Guid.Empty)
                 entity.Id = Guid.NewGuid();
 
-            entity.CreatedAt = DateTime.UtcNow;
+            // entity.CreatedAt = DateTime.UtcNow;
 
             if (_repository.ContainsKey(entity.Id))
                 return false;
