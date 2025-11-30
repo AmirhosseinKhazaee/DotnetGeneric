@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +12,8 @@ namespace XGeneric.Extensions
     public static class AttributeExtension
     {
         public static bool HasKey<T>(this T source)
-        where T : BaseModel {
+        where T : BaseModel
+        {
             var result = false;
             var keyMetadata = source.GetKeyMetadata();
             var count = keyMetadata!.Count;
@@ -22,7 +24,8 @@ namespace XGeneric.Extensions
             return result;
         }
         public static bool HasOneKey<T>(this T source)
-        where T : BaseModel {
+        where T : BaseModel
+        {
             var result = false;
             var keyMetadata = source.GetKeyMetadata();
             if (keyMetadata!.Count == 1)
@@ -33,7 +36,8 @@ namespace XGeneric.Extensions
 
         }
         public static XKeyAttribute? GetKeyMetadata<T>(this T source)
-        where T : BaseModel{
+        where T : BaseModel
+        {
             var prop = typeof(T)
                 .GetProperties()
                 .FirstOrDefault(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
@@ -57,5 +61,12 @@ namespace XGeneric.Extensions
             attr.KeyFieldValue = prop.GetValue(source);
             return attr;
         }
+        public static bool IsXBaseModel<T>(this T source)
+        where T : BaseModel
+        {
+            var result = Attribute.IsDefined(typeof(T), typeof(XBaseModelAttribute)) && source.HasOneKey();
+            return result;
+        }
+
     }
 }

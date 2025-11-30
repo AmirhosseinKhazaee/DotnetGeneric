@@ -21,20 +21,15 @@ namespace XGeneric.Api.Controllers
         {
             //
             var person = new Person(); // Comes From Every where ...
-
-            //
-            var keyMetadata = person.GetKeyMetadata();
-            if (keyMetadata == null)
+            if (person.IsXBaseModel())
             {
-                return BadRequest("No key defined for this model.");
+               return $"{person.GetType().Name} is XBaseModel";
             }
+            //
 
-            // Otherwise, use keyMetadata
+            // Otherwise, use keyMetadat
 
-            var result = keyMetadata.Count;
-            Console.WriteLine(keyMetadata.ToString());
-
-            return result;
+            return false;
 
 
         }
