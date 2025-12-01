@@ -4,113 +4,116 @@ using XGeneric.Extensions;
 using XGeneric.Models;
 using XGeneric.Repository;
 
-namespace XGeneric.Api.Controllers
+namespace XGeneric.Api.Controllers;
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class PersonController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/[controller]")]
-    public class PersonController : ControllerBase
+    private readonly IGenericRepo<Person> _personRepo;
+    private readonly IGenericRepo<Tasks> _taskRepo;
+
+    // Inject both repositories
+    public PersonController(
+        IGenericRepo<Person> personRepo,
+        IGenericRepo<Tasks> taskRepo)
     {
-        private readonly IGenericRepo<Person> _personRepo;
+        _personRepo = personRepo;
+        _taskRepo = taskRepo;
+    }
 
-        public PersonController(IGenericRepo<Person> personRepo)
+    [HttpGet("test")]
+    public IActionResult Test()
+    {
+        var person = new Person();
+
+        if (person.IsXBaseModel())
         {
-            _personRepo = personRepo;
-        }
-        [HttpGet("test")]
-        public object Test()
-        {
-            //
-            var person = new Person(); // Comes From Every where ...
-            if (person.IsXBaseModel())
+            return Ok(new
             {
-                return $"{person.GetType().Name} is XBaseModel \n" + $"created at{person.CreatedAt} , updated at{person.UpdatedAt}";
-            }
-            //
-
-            // Otherwise, use keyMetadat
-
-            return false;
-
-
+                Model = person.GetType().Name,
+                CreatedAt = person.CreatedAt,
+                UpdatedAt = person.UpdatedAt
+            });
         }
 
-        // GET: api/person
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var result = _personRepo.GetAll();
+        return BadRequest("Model is not XBaseModel");
+    }
 
-            //
-            var controllerName = ControllerContext.GetControllerName();
-            return Ok(result);
-        }
+    [HttpPost("test2")]
+    public object CreateTask(Tasks model)
+    {
+        if (model == null)
+            return BadRequest("Invalid data");
 
-        // GET: api/person/{id}
-        [HttpGet("{id:guid}")]
-        public IActionResult GetById(Guid id)
-        {
-            var result = _personRepo.GetById(id);
+        // Initialize XBaseModel metadata
+        model.IsXBaseModel();
 
-            if (result == null)
-                return NotFound("Person not found");
+        var success = _taskRepo.Add(model);
 
-            return Ok(result);
-        }
+        if (!success)
+            return Conflict("A task with this ID already exists");
 
-        // POST: api/person
-        [HttpPost]
-        public IActionResult Create(Person model)
-        {
-            if (model == null)
-                return BadRequest("Invalid data");
+        return "ok";
+    }
 
-            var success = _personRepo.Add(model);
+    [HttpGet("task/{id:guid}")]
+    public IActionResult GetTaskById(Guid id)
+    {
+        var task = _taskRepo.GetById(id);
+        if (task == null) return NotFound("Task not found");
+        return Ok(task);
+    }
 
-            if (!success)
-                return Conflict("A person with this ID already exists");
+    [HttpPost]
+    public IActionResult CreatePerson(Person model)
+    {
+        if (model == null)
+            return BadRequest("Invalid data");
 
-            return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
-        }
+        model.IsXBaseModel();
 
-        // PUT: api/person/{id}
-        [HttpPut("{id:guid}")]
-        public object Update(Guid id, Person model)
-        {
-            if (model == null)
-                return BadRequest("Invalid data");
+        var success = _personRepo.Add(model);
 
-            var existing = _personRepo.GetById(id);
+        if (!success)
+            return Conflict("A person with this ID already exists");
 
-            if (existing == null)
-                return NotFound("Person not found");
+        return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
+    }
 
-            // update fields
-            existing.Username = model.Username;
-            existing.Firstname = model.Firstname;
-            existing.Lastname = model.Lastname;
-            existing.UpdatedAt = DateTime.Now; 
-            var success = _personRepo.Update(existing);
-            if (model.IsXBaseModel())
-            {
-                return $"{model.GetType().Name} is XBaseModel \n" + $"created at{model.CreatedAt} , updated at{model.UpdatedAt}";
-            }
+    [HttpGet("{id:guid}")]
+    public IActionResult GetById(Guid id)
+    {
+        var person = _personRepo.GetById(id);
+        if (person == null) return NotFound("Person not found");
+        return Ok(person);
+    }
 
-            if (!success)
-                return StatusCode(500, "Cannot update person");
+    [HttpPut("{id:guid}")]
+    public IActionResult UpdatePerson(Guid id, Person model)
+    {
+        if (model == null) return BadRequest("Invalid data");
 
-            return Ok(existing);
-        }
+        var existing = _personRepo.GetById(id);
+        if (existing == null) return NotFound("Person not found");
 
-        // DELETE: api/person/{id}
-        [HttpDelete("{id:guid}")]
-        public IActionResult Delete(Guid id)
-        {
-            var success = _personRepo.Delete(id);
+        // Update fields
+        existing.Username = model.Username;
+        existing.Firstname = model.Firstname;
+        existing.Lastname = model.Lastname;
+        existing.UpdatedAt = DateTime.UtcNow;
 
-            if (!success)
-                return NotFound("Person not found");
+        var success = _personRepo.Update(existing);
+        if (!success) return StatusCode(500, "Cannot update person");
 
-            return Ok("Person deleted");
-        }
+        return Ok(existing);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public IActionResult DeletePerson(Guid id)
+    {
+        var success = _personRepo.Delete(id);
+        if (!success) return NotFound("Person not found");
+        return Ok("Person deleted");
     }
 }

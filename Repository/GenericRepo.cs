@@ -1,21 +1,35 @@
-using System;
-using System.Collections.Generic;
+using System.Reflection;
+using XGeneric.Attributes;
+using XGeneric.Extensions;
 using XGeneric.Models;
 
 namespace XGeneric.Repository
 {
     public class GenericRepo<T> : IGenericRepo<T> where T : BaseModel
     {
-        private readonly Dictionary<Guid, T> _repository = new();
+        private readonly Dictionary<object, T> _repository = new();
+
+        private PropertyInfo GetKeyProperty()
+        {
+            var result = typeof(T).GetProperties().FirstOrDefault(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
+            return result;
+        }
+
+        private object GetKeyValue(T entity)
+        {
+            var prop = GetKeyProperty();
+            var result = prop.GetValue(entity);
+            return result;
+        }
 
         public IEnumerable<T> GetAll()
         {
             return _repository.Values;
         }
 
-        public T GetById(Guid id)
+        public T GetById(object id)
         {
-            if (id == Guid.Empty)
+            if (id == null)
                 return null;
 
             if (!_repository.ContainsKey(id))
@@ -29,15 +43,25 @@ namespace XGeneric.Repository
             if (entity == null)
                 return false;
 
-            if (entity.Id == Guid.Empty)
-                entity.Id = Guid.NewGuid();
+            // init model metadata (CreatedAt, UpdatedAt, etc.)
+            entity.IsXBaseModel();
 
-            // entity.CreatedAt = DateTime.UtcNow;
+            var key = GetKeyValue(entity);
 
-            if (_repository.ContainsKey(entity.Id))
+            if (key == null)
                 return false;
 
-            _repository.Add(entity.Id, entity);
+            // If key is GUID and empty, create GUID
+            if (key is Guid g && g == Guid.Empty)
+            {
+                key = Guid.NewGuid();
+                GetKeyProperty().SetValue(entity, key);
+            }
+
+            if (_repository.ContainsKey(key))
+                return false;
+
+            _repository.Add(key, entity);
             return true;
         }
 
@@ -46,14 +70,20 @@ namespace XGeneric.Repository
             if (entity == null)
                 return false;
 
-            if (!_repository.ContainsKey(entity.Id))
+            var key = GetKeyValue(entity);
+            if (key == null)
                 return false;
 
-            _repository[entity.Id] = entity;
+            if (!_repository.ContainsKey(key))
+                return false;
+
+            entity.UpdatedAt = DateTime.UtcNow;
+
+            _repository[key] = entity;
             return true;
         }
 
-        public bool Delete(Guid id)
+        public bool Delete(object id)
         {
             if (!_repository.ContainsKey(id))
                 return false;
