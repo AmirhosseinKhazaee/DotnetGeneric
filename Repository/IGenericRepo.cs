@@ -1,8 +1,35 @@
-public interface IGenericRepo<T> 
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace XGeneric.Repository
 {
-    IEnumerable<T> GetAll();
-    T? GetById(object id);    // Use object, because key type is unknown
-    bool Add(T entity);
-    bool Update(T entity);
-    bool Delete(object id);   // object works for any key type
+    public interface IGenericRepo<T> where T : class
+    {
+        // Async methods for high-concurrency WebAPI
+
+        /// <summary>
+        /// Get all entities
+        /// </summary>
+        Task<IEnumerable<T>> GetAllAsync();
+
+        /// <summary>
+        /// Get entity by key
+        /// </summary>
+        Task<T?> GetByIdAsync(object id);
+
+        /// <summary>
+        /// Add a new entity
+        /// </summary>
+        Task<bool> AddAsync(T entity);
+
+        /// <summary>
+        /// Update an existing entity
+        /// </summary>
+        Task<bool> UpdateAsync(T entity);
+
+        /// <summary>
+        /// Delete entity by key
+        /// </summary>
+        Task<bool> DeleteAsync(object id);
+    }
 }

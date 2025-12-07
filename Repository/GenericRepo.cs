@@ -8,48 +8,59 @@ namespace XGeneric.Repository
     public class GenericRepo<T> : IGenericRepo<T> where T : BaseModel
     {
         private readonly Dictionary<object, T> _repository = new();
+        private readonly object _locker = new(); // lock object for thread-safety
 
+        // Get the property marked with [XKey]
         private PropertyInfo GetKeyProperty()
         {
-            var result = typeof(T).GetProperties().FirstOrDefault(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
+            var result = typeof(T).GetProperties()
+                .FirstOrDefault(p => Attribute.IsDefined(p, typeof(XKeyAttribute)));
+            if (result == null)
+                throw new Exception($"No property with [XKey] found on {typeof(T).Name}");
             return result;
         }
 
         private object GetKeyValue(T entity)
         {
             var prop = GetKeyProperty();
-            var result = prop.GetValue(entity);
-            return result;
+            return prop.GetValue(entity) ?? throw new Exception("Key value is null");
         }
 
-        public IEnumerable<T> GetAll()
+        #region Async Methods
+
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return _repository.Values;
+            List<T> result;
+
+            lock (_locker)
+            {
+                result = _repository.Values.ToList();
+            }
+
+            return await Task.FromResult(result);
         }
 
-        public T GetById(object id)
+
+        public async Task<T?> GetByIdAsync(object id)
         {
-            if (id == null)
-                return null;
+            if (id == null) return null;
 
-            if (!_repository.ContainsKey(id))
-                return null;
+            T? result;
 
-            return _repository[id];
+            lock (_locker)
+            {
+                _repository.TryGetValue(id , out result);
+            }
+                return await Task.FromResult(result);
         }
 
-        public bool Add(T entity)
+        public async Task<bool> AddAsync(T entity)
         {
-            if (entity == null)
-                return false;
+            if (entity == null) return false;
 
-            // init model metadata (CreatedAt, UpdatedAt, etc.)
-            entity.IsXBaseModel();
+            entity.IsXBaseModel(); // init metadata
 
             var key = GetKeyValue(entity);
-
-            if (key == null)
-                return false;
 
             // If key is GUID and empty, create GUID
             if (key is Guid g && g == Guid.Empty)
@@ -58,37 +69,44 @@ namespace XGeneric.Repository
                 GetKeyProperty().SetValue(entity, key);
             }
 
-            if (_repository.ContainsKey(key))
-                return false;
+            lock (_locker)
+            {
+                if (_repository.ContainsKey(key)) return false;
 
-            _repository.Add(key, entity);
-            return true;
+                _repository.Add(key, entity);
+                return true;
+            }
         }
 
-        public bool Update(T entity)
+        public async Task<bool> UpdateAsync(T entity)
         {
-            if (entity == null)
-                return false;
+            if (entity == null) return false;
 
             var key = GetKeyValue(entity);
-            if (key == null)
-                return false;
+            if (key == null) return false;
 
-            if (!_repository.ContainsKey(key))
-                return false;
+            lock (_locker)
+            {
+                if (!_repository.ContainsKey(key)) return false;
 
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            _repository[key] = entity;
-            return true;
+                entity.UpdatedAt = DateTime.UtcNow;
+                _repository[key] = entity;
+                return true;
+            }
         }
 
-        public bool Delete(object id)
+        public async Task<bool> DeleteAsync(object id)
         {
-            if (!_repository.ContainsKey(id))
-                return false;
+            if (id == null) return false;
 
-            return _repository.Remove(id);
+            lock (_locker)
+            {
+                if (!_repository.ContainsKey(id)) return false;
+
+                return _repository.Remove(id);
+            }
         }
+
+        #endregion
     }
 }

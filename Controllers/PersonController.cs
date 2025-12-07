@@ -13,7 +13,6 @@ public class PersonController : ControllerBase
     private readonly IGenericRepo<Person> _personRepo;
     private readonly IGenericRepo<Tasks> _taskRepo;
 
-    // Inject both repositories
     public PersonController(
         IGenericRepo<Person> personRepo,
         IGenericRepo<Tasks> taskRepo)
@@ -21,80 +20,55 @@ public class PersonController : ControllerBase
         _personRepo = personRepo;
         _taskRepo = taskRepo;
     }
-
-    [HttpGet("test")]
-    public IActionResult Test()
+    [HttpGet("getall")]
+    public async Task<IEnumerable<Person>> GetAll()
     {
-        var person = new Person();
-
-        if (person.IsXBaseModel())
-        {
-            return Ok(new
-            {
-                Model = person.GetType().Name,
-                CreatedAt = person.CreatedAt,
-                UpdatedAt = person.UpdatedAt
-            });
-        }
-
-        return BadRequest("Model is not XBaseModel");
+        var result = await _personRepo.GetAllAsync();
+        return result;
     }
 
-    [HttpPost("test2")]
-    public object CreateTask(Tasks model)
-    {
-        if (model == null)
-            return BadRequest("Invalid data");
 
-        // Initialize XBaseModel metadata
-        model.IsXBaseModel();
-
-        var success = _taskRepo.Add(model);
-
-        if (!success)
-            return Conflict("A task with this ID already exists");
-
-        return "ok";
-    }
-
+    // Async Get Task
     [HttpGet("task/{id:guid}")]
-    public IActionResult GetTaskById(Guid id)
+    public async Task<IActionResult> GetTaskById(Guid id)
     {
-        var task = _taskRepo.GetById(id);
+        var task = await _taskRepo.GetByIdAsync(id);
         if (task == null) return NotFound("Task not found");
         return Ok(task);
     }
 
+    // Async Create Person
     [HttpPost]
-    public IActionResult CreatePerson(Person model)
+    public async Task<IActionResult> CreatePerson(Person model)
     {
         if (model == null)
             return BadRequest("Invalid data");
 
         model.IsXBaseModel();
 
-        var success = _personRepo.Add(model);
-
+        var success = await _personRepo.AddAsync(model);
         if (!success)
             return Conflict("A person with this ID already exists");
 
         return CreatedAtAction(nameof(GetById), new { id = model.Id }, model);
     }
 
+    // Async Get Person
     [HttpGet("{id:guid}")]
-    public IActionResult GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id)
     {
-        var person = _personRepo.GetById(id);
+        var person = await _personRepo.GetByIdAsync(id);
         if (person == null) return NotFound("Person not found");
         return Ok(person);
     }
 
+    // Async Update Person
     [HttpPut("{id:guid}")]
-    public IActionResult UpdatePerson(Guid id, Person model)
+    public async Task<IActionResult> UpdatePerson(Guid id, Person model)
     {
         if (model == null) return BadRequest("Invalid data");
 
-        var existing = _personRepo.GetById(id);
+        var existing = await _personRepo.GetByIdAsync(id);
         if (existing == null) return NotFound("Person not found");
 
         // Update fields
@@ -103,16 +77,17 @@ public class PersonController : ControllerBase
         existing.Lastname = model.Lastname;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        var success = _personRepo.Update(existing);
+        var success = await _personRepo.UpdateAsync(existing);
         if (!success) return StatusCode(500, "Cannot update person");
 
         return Ok(existing);
     }
 
+    // Async Delete Person
     [HttpDelete("{id:guid}")]
-    public IActionResult DeletePerson(Guid id)
+    public async Task<IActionResult> DeletePerson(Guid id)
     {
-        var success = _personRepo.Delete(id);
+        var success = await _personRepo.DeleteAsync(id);
         if (!success) return NotFound("Person not found");
         return Ok("Person deleted");
     }
